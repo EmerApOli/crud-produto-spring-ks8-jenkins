@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crud-produto-config
+  namespace: estudo-jenkins
+data:
+  SERVER_PORT: "8080"
+  DB_URL: "jdbc:postgresql://postgres-service:5432/produto_db"
+  DDL_AUTO: "update"
+  SHOW_SQL: "false"
