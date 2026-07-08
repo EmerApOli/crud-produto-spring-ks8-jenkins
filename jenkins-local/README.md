@@ -7,7 +7,21 @@ Esta pasta sobe um Jenkins local com:
 - Docker Compose plugin
 - kubectl
 - acesso ao Docker da máquina pelo `/var/run/docker.sock`
-- acesso ao Kubernetes local pelo kubeconfig montado em `/root/.kube`
+- acesso ao Kubernetes local pelo kubeconfig montado em `/var/jenkins_home/.kube/config`
+
+O host pode ser Ubuntu. As instalações do `Dockerfile`, porém, são executadas
+dentro da imagem do Jenkins, que atualmente é baseada em Debian. O arquivo detecta
+Debian ou Ubuntu automaticamente ao configurar o repositório do Docker.
+
+## Pré-requisitos no Ubuntu
+
+```bash
+sudo apt-get update
+sudo apt-get install -y docker.io docker-compose-v2
+sudo usermod -aG docker "$USER"
+```
+
+Após adicionar o usuário ao grupo `docker`, encerre e abra novamente a sessão.
 
 ## Subir Jenkins
 
@@ -28,27 +42,29 @@ http://localhost:8085
 
 Senha inicial:
 
-```powershell
+```bash
 docker exec -it jenkins-local cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
 ## Testar ferramentas dentro do Jenkins
 
-```powershell
+```bash
 docker exec -it jenkins-local mvn -version
 docker exec -it jenkins-local docker version
+docker exec -it jenkins-local docker compose version
 docker exec -it jenkins-local kubectl version --client
 docker exec -it jenkins-local kubectl get nodes
 ```
 
-Se `kubectl get nodes` falhar, confira se o Kubernetes está habilitado no Docker Desktop e se o arquivo abaixo existe:
+Se `kubectl get nodes` falhar, confirme o contexto e o arquivo usados no host:
 
-```text
-C:\Users\Dell\.kube\config
+```bash
+test -f "$HOME/.kube/config"
+kubectl config current-context
 ```
 
-No Docker Desktop, habilite Kubernetes em:
+Para usar outro kubeconfig:
 
-```text
-Settings > Kubernetes > Enable Kubernetes
+```bash
+KUBE_CONFIG_PATH=/caminho/para/config docker compose up -d --build
 ```
