@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         APP_IMAGE = 'crud-produto:latest'
+        K8S_CONTEXT = 'docker-desktop'
         K8S_NAMESPACE = 'estudo-jenkins'
         APP_DEPLOYMENT = 'crud-produto-app'
         POSTGRES_DEPLOYMENT = 'postgres'
@@ -49,7 +50,7 @@ pipeline {
             steps {
                 sh '''
                   kubectl version --client
-                  kubectl get nodes
+                  kubectl --context ${K8S_CONTEXT} get nodes
                 '''
             }
         }
@@ -57,7 +58,7 @@ pipeline {
         stage('Deploy Kubernetes') {
             steps {
                 sh '''
-                  kubectl apply -f k8s/
+                  kubectl --context ${K8S_CONTEXT} apply -f k8s/
                 '''
             }
         }
@@ -65,8 +66,8 @@ pipeline {
         stage('Rollout Status') {
             steps {
                 sh '''
-                  kubectl rollout status deployment/${POSTGRES_DEPLOYMENT} -n ${K8S_NAMESPACE} --timeout=180s
-                  kubectl rollout status deployment/${APP_DEPLOYMENT} -n ${K8S_NAMESPACE} --timeout=180s
+                  kubectl --context ${K8S_CONTEXT} rollout status deployment/${POSTGRES_DEPLOYMENT} -n ${K8S_NAMESPACE} --timeout=180s
+                  kubectl --context ${K8S_CONTEXT} rollout status deployment/${APP_DEPLOYMENT} -n ${K8S_NAMESPACE} --timeout=180s
                 '''
             }
         }
@@ -75,10 +76,10 @@ pipeline {
             steps {
                 sh '''
                   echo "Pods:"
-                  kubectl get pods -n ${K8S_NAMESPACE} -o wide
+                  kubectl --context ${K8S_CONTEXT} get pods -n ${K8S_NAMESPACE} -o wide
 
                   echo "Services:"
-                  kubectl get svc -n ${K8S_NAMESPACE}
+                  kubectl --context ${K8S_CONTEXT} get svc -n ${K8S_NAMESPACE}
 
                   echo "Testando aplicação em ${HEALTH_URL}"
                   for i in $(seq 1 30); do
@@ -91,7 +92,7 @@ pipeline {
                   done
 
                   echo "Aplicação não respondeu no health check. Últimos logs:"
-                  kubectl logs deployment/${APP_DEPLOYMENT} -n ${K8S_NAMESPACE} --tail=120 || true
+                  kubectl --context ${K8S_CONTEXT} logs deployment/${APP_DEPLOYMENT} -n ${K8S_NAMESPACE} --tail=120 || true
                   exit 1
                 '''
             }
