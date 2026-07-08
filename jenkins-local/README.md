@@ -11,9 +11,11 @@ Esta pasta sobe um Jenkins local com:
 
 ## Subir Jenkins
 
-No Windows PowerShell, execute dentro desta pasta:
+No Linux, execute dentro desta pasta:
 
-```powershell
+```bash
+test -f "$HOME/.kube/config"
+kubectl config current-context
 docker compose down
 docker compose up -d --build
 ```

@@ -1,5 +1,7 @@
 FROM jenkins/jenkins:lts
 
+ENV KUBECONFIG=/var/jenkins_home/.kube/config
+
 USER root
 
 RUN apt-get update && \
@@ -15,5 +17,8 @@ RUN apt-get update && \
     rm kubectl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /var/jenkins_home/.kube && \
+    chown -R jenkins:jenkins /var/jenkins_home/.kube
 
 USER jenkins
